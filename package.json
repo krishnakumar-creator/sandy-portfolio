@@ -1,0 +1,14 @@
+{
+  "name": "sandhya-portfolio",
+  "version": "1.0.0",
+  "description": "Sandhya's Media Portfolio",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
