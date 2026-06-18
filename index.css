@@ -1267,31 +1267,36 @@ footer {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.5);
-  /* Height-driven: width auto-adapts to poster's natural aspect ratio */
+  /* Fixed dimensions so card wrapper is sized correctly for 3D positioning */
   height: 500px;
-  width: auto;
-  max-width: 90vw;
-  border-radius: 24px;
-  overflow: hidden;
-  border: 1px solid var(--card-border);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  width: 350px;
+  overflow: visible; /* Prevent box shadow clipping */
   transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1),
     opacity 0.65s,
-    z-index 0.65s,
-    border-color 0.4s,
-    box-shadow 0.4s;
-  background-color: var(--bg-deep-black);
+    z-index 0.65s;
+  background-color: transparent;
   opacity: 0;
   z-index: 1;
   pointer-events: none;
   transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .poster-slide-card img {
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   width: auto;
+  height: auto;
+  object-fit: contain;
   display: block;
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 24px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.4s,
+    box-shadow 0.4s;
 }
 
 /* Active State (Centered, foreground, scaled up, glowing) */
@@ -1300,6 +1305,9 @@ footer {
   z-index: 10;
   opacity: 1;
   pointer-events: auto;
+}
+
+.poster-slide-card.active img {
   border-color: rgba(0, 136, 255, 0.4);
   box-shadow: 0 25px 60px rgba(0, 136, 255, 0.35);
 }
@@ -1421,6 +1429,7 @@ footer {
 
   .poster-slide-card {
     height: 420px;
+    width: 300px;
   }
 
   .poster-slide-card.prev {
@@ -1439,6 +1448,7 @@ footer {
 
   .poster-slide-card {
     height: 360px;
+    width: 260px;
   }
 
   .poster-nav-btn {
@@ -1465,6 +1475,7 @@ footer {
 
   .poster-slide-card {
     height: 320px;
+    width: 230px;
   }
 
   .poster-slide-card.prev {
@@ -1506,7 +1517,7 @@ footer {
   right: 0;
   width: 100%;
   height: 100%;
-  background: url('sandhya_profile_laptop.png') bottom right / contain no-repeat;
+  background: url('public/sandhya_profile_laptop.webp') bottom right / contain no-repeat;
   z-index: 1;
 }
 

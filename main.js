@@ -39,8 +39,9 @@ function parseCSV(csvText) {
 }
 
 // Helper to convert Google Drive share links to direct rendering links
-function getGoogleDriveDirectLink(url) {
-  if (!url) return '';
+// Returns an array of URLs to try in order (primary + fallbacks)
+function getGoogleDriveDirectLinks(url) {
+  if (!url) return [];
   url = url.trim();
   const regexes = [
     /\/file\/d\/([a-zA-Z0-9_-]+)/,
@@ -52,10 +53,20 @@ function getGoogleDriveDirectLink(url) {
     const match = url.match(regex);
     if (match && match[1]) {
       const fileId = match[1];
-      return `https://lh3.googleusercontent.com/d/${fileId}`;
+      return [
+        `https://lh3.googleusercontent.com/d/${fileId}`,
+        `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`,
+        `https://drive.google.com/uc?export=view&id=${fileId}`
+      ];
     }
   }
-  return url;
+  return [url];
+}
+
+// Legacy single-URL wrapper for backward compatibility
+function getGoogleDriveDirectLink(url) {
+  const links = getGoogleDriveDirectLinks(url);
+  return links.length > 0 ? links[0] : '';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -348,6 +359,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 400);
       };
     }
+
+    // Touch/swipe support for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwiping = false;
+
+    postersSlider.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].clientX;
+      touchStartY = e.changedTouches[0].clientY;
+      isSwiping = true;
+    }, { passive: true });
+
+    postersSlider.addEventListener('touchmove', (e) => {
+      if (!isSwiping) return;
+      const dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+      const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+      // If horizontal swipe is dominant, prevent vertical scroll
+      if (dx > dy && dx > 10) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    postersSlider.addEventListener('touchend', (e) => {
+      if (!isSwiping) return;
+      isSwiping = false;
+      const touchEndX = e.changedTouches[0].clientX;
+      const diff = touchStartX - touchEndX;
+      const threshold = 50;
+
+      if (Math.abs(diff) > threshold) {
+        if (diff > 0) {
+          // Swiped left → next
+          posterActiveIndex = (posterActiveIndex + 1) % posterCards.length;
+        } else {
+          // Swiped right → prev
+          posterActiveIndex = (posterActiveIndex - 1 + posterCards.length) % posterCards.length;
+        }
+        updatePosterCoverflow();
+      }
+    }, { passive: true });
   }
 
 
