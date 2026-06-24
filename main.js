@@ -470,15 +470,44 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error("No valid poster entries found in CSV.");
       }
 
+      // Preload images to verify they load successfully, with a timeout
+      const preloadPromises = items.map(item => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          const timeoutId = setTimeout(() => {
+            img.onload = null;
+            img.onerror = null;
+            resolve({ item, success: false });
+          }, 6000); // 6 seconds timeout
+
+          img.onload = () => {
+            clearTimeout(timeoutId);
+            resolve({ item, success: true });
+          };
+          img.onerror = () => {
+            clearTimeout(timeoutId);
+            resolve({ item, success: false });
+          };
+          img.src = item.imageUrl;
+        });
+      });
+
+      const results = await Promise.all(preloadPromises);
+      const successfulItems = results.filter(r => r.success).map(r => r.item);
+
+      if (successfulItems.length === 0) {
+        throw new Error("All dynamic images failed to load. This is likely because the Google Drive links are restricted/private.");
+      }
+
       // Clear current content and render poster cards from CSV data
       postersSlider.innerHTML = '';
-      items.forEach(item => {
+      successfulItems.forEach(item => {
         const article = document.createElement('article');
         article.className = 'poster-slide-card';
 
         const img = document.createElement('img');
         img.src = item.imageUrl;
-        img.alt = '';
+        img.alt = item.altText || '';
 
         article.appendChild(img);
 
